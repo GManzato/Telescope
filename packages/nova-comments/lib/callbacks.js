@@ -3,6 +3,14 @@
 //////////////////////////////////////////////////////
 
 Comments.before.insert(function (userId, doc) {
+
+  // console.log(doc);
+
+  // var pattern = /\B@[a-z0-9_-]+/gi;
+  // var mentions = doc.body.match(pattern);
+
+  // console.log(mentions);
+
   // note: only actually sanitizes on the server
   doc.htmlBody = Telescope.utils.sanitize(marked(doc.body));
 });
@@ -81,7 +89,8 @@ if (typeof Telescope.notifications !== "undefined") {
           notificationData = {
             comment: _.pick(comment, '_id', 'userId', 'author', 'htmlBody'),
             post: _.pick(post, '_id', 'userId', 'title', 'url')
-          };
+          },
+          mentions = comment.body.match(/\B@[a-z0-9_-]+/gi);
 
 
       // 1. Notify author of post (if they have new comment notifications turned on)
@@ -126,6 +135,26 @@ if (typeof Telescope.notifications !== "undefined") {
 
         userIdsNotified = userIdsNotified.concat(subscriberIdsToNotify);
 
+      }
+
+      // 4. Mentions
+      // TODO: Make a nova-mentions package
+      console.log(mentions);
+      if(mentions.length){
+        usersName = mentions.map(function(user){
+          return user.slice(1);
+        });
+        console.log(usersName);
+
+        usersToNotify = Users.find({username : {$in : usersName}}).fetch();
+
+        console.log(usersToNotify);
+
+        usersIdsToNotify = usersToNotify.map(function(user){
+          return user._id
+        });
+        console.log(usersIdsToNotify);
+        Telescope.createNotification('Zqh2Dw2LrMpdYL2bD', 'newMention', notificationData);
       }
 
     }

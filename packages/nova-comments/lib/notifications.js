@@ -40,5 +40,15 @@ Telescope.notifications = Object.assign(Telescope.notifications, {
       return properties.authorName+' left a new comment on "' + properties.postTitle + '"';
     },
     emailTemplate: "newComment"
+  },
+
+  newMention : {
+    properties(data) {
+      return Comments.getNotificationProperties(data.comment, data.post);
+    },
+    subject(properties) {
+      return properties.authorName+' mention you in a new comment on "' + properties.postTitle + '"';
+    },
+    emailTemplate: "newMention"
   }
 });
